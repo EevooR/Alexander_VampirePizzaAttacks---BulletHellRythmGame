@@ -24,26 +24,30 @@ while CONTINUEGAME:
     ENEMYHEALTHDEDUCTION = 2
 
     SONGFILES = {
-        1: ("ByeByeBye.beatmap.txt", "ByeByeBye.mp3", "Bye Bye Bye", 4),
-        2: ("Cara_Mia_Addio.beatmap.txt", "Cara_Mia_Addio.mp3", "Cara Mia Addio", 3),
-        3: ("Evanescence-Sick.beatmap.txt", "Evanescence-Sick.mp3", "Sick", 4),
-        4: ("Isolation.beatmap.txt", "Isolation.mp3", "Isolation", 3),
-        5: ("MiseryBusiness.beatmap.txt", "MiseryBusiness.mp3", "Misery Business", 4),
-        6: ("Pearlescent.beatmap.txt", "Pearlescent.mp3", "Pearlescent", 3),
-        7: ("Positivity.beatmap.txt", "Positivity.mp3", "Positivity", 3),
-        8: ("Still_Alive_Radio_Mix.beatmap.txt", "Still_Alive_Radio_Mix.mp3", "Still Alive Radio", 1),
-        9: ("StillAlive.beatmap.txt", "StillAlive.mp3", "Still Alive", 3),
-        10: ("ThatsWhatYouGet.beatmap.txt", "ThatsWhatYouGet.mp3", "That's What You Get", 4),
-        11: ("ThePlagues.beatmap.txt", "ThePlagues.mp3", "The Plagues", 3),
-        12: ("Thoughts.beatmap.txt", "Thoughts.mp3", "Thoughts", 2),
-        13: ("TouchOfGold-Extended.beatmap.txt", "TouchOfGold-Extended.mp3", "Touch of Gold", 5),
-        14: ("Turret_Wife_Serenade.beatmap.txt", "Turret_Wife_Serenade.mp3", "Turret Wife Serenade", 2),
-        15: ("Want_You_Gone.beatmap.txt", "Want_You_Gone.mp3", "Want You Gone", 3),
-        16: ("YouCantEscapeYouKnow.beatmap.txt", "YouCantEscapeYouKnow.mp3", "You Can't Escape You Know", 7),
-        17: ("GoldenLand.beatmap.txt", "GoldenLand.mp3", "Golden Lands of Prester John", 5)
+        # 1: ("ByeByeBye.beatmap.txt", "ByeByeBye.mp3", "Bye Bye Bye", 4),
+        # 2: ("Cara_Mia_Addio.beatmap.txt", "Cara_Mia_Addio.mp3", "Cara Mia Addio", 3),
+        # 3: ("Evanescence-Sick.beatmap.txt", "Evanescence-Sick.mp3", "Sick", 4),
+        1: ("Isolation.beatmap.txt", "Isolation.mp3", "Isolation", 2.14),
+        # 5: ("MiseryBusiness.beatmap.txt", "MiseryBusiness.mp3", "Misery Business", 4),
+        # 6: ("Pearlescent.beatmap.txt", "Pearlescent.mp3", "Pearlescent", 3),
+        # 7: ("Positivity.beatmap.txt", "Positivity.mp3", "Positivity", 3),
+        # 8: ("Still_Alive_Radio_Mix.beatmap.txt", "Still_Alive_Radio_Mix.mp3", "Still Alive Radio", 1),
+        # 9: ("StillAlive.beatmap.txt", "StillAlive.mp3", "Still Alive", 3),
+        # 10: ("ThatsWhatYouGet.beatmap.txt", "ThatsWhatYouGet.mp3", "That's What You Get", 4),
+        # 11: ("ThePlagues.beatmap.txt", "ThePlagues.mp3", "The Plagues", 3),
+        # 12: ("Thoughts.beatmap.txt", "Thoughts.mp3", "Thoughts", 2),
+        # 13: ("TouchOfGold-Extended.beatmap.txt", "TouchOfGold-Extended.mp3", "Touch of Gold", 5),
+        # 14: ("Turret_Wife_Serenade.beatmap.txt", "Turret_Wife_Serenade.mp3", "Turret Wife Serenade", 2),
+        # 15: ("Want_You_Gone.beatmap.txt", "Want_You_Gone.mp3", "Want You Gone", 3),
+        # 16: ("YouCantEscapeYouKnow.beatmap.txt", "YouCantEscapeYouKnow.mp3", "You Can't Escape You Know", 7),
+        # 17: ("GoldenLand.beatmap.txt", "GoldenLand.mp3", "Golden Lands of Prester John", 5)
+        2: ("Handlebars.beatmap.txt", "Handlebars.mp3", "Handlebars", 3.44),
+        3: ("Uprising.beatmap.txt", "Uprising.mp3", "Uprising", 5.05),
+        4: ("GreatAmericanBitch.beatmap.txt", "GreatAmericanBitch.mp3", "Great American Bitch", 3.35),
+        5: ("TheMarch.beatmap.txt", "TheMarch.mp3", "The March", 3.5)
     }
 
-    SONGCHOICE = randint(1, 17)
+    SONGCHOICE = randint(2, 5)
     SONGBMP = '../gameassets/Music/' + str(SONGFILES[SONGCHOICE][0])
     SONG = '../gameassets/Music/' + str(SONGFILES[SONGCHOICE][1])
 
@@ -74,7 +78,8 @@ while CONTINUEGAME:
     JCOOLDOWN = 240
 
     MAX_BAD_REVIEWS = 300
-    WIN_TIME = FRAME_RATE * 60 * SONGFILES[SONGCHOICE][3]
+    WT_TIME = FRAME_RATE * 60 * SONGFILES[SONGCHOICE][3]
+    WIN_TIME = int(round(WT_TIME))
 
     GAME_WINDOW = display.set_mode(WINDOW_RES)
     display.set_caption('Attack of the Vampire Pizzas by Enzo Alexander - BulletHell')
@@ -777,4 +782,3 @@ while CONTINUEGAME:
         clock.tick(FRAME_RATE)
     # clean up
     pygame.quit()
-
