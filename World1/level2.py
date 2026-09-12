@@ -5,7 +5,7 @@ from random import randint
 
 CONTINUEGAME = True
 
-
+ #TODO: Add enemy apperance rates and new enemeys,
 while CONTINUEGAME:
     pygame.init()
 
@@ -36,15 +36,29 @@ while CONTINUEGAME:
          10: ("Forgw.beatmap.txt", "Forgw.mp3", "2024 - Forge", 7.04),
          11: ("birds.beatmap.txt", "birds.mp3", "2025 - Birds of a Feather", 7.4),
          12: ("Zen-Definitive-Version.beatmap.txt", "Zen-Definitive-Version.mp3", "Zen Definitive Version", 3.07),
+         13: ("SpaceDebris.beatmap.txt", "SpaceDebris.mp3", "Space Debris", 5.39),
+         14: ("BeWithYou.beatmap.txt", "BeWithYou.mp3", "Be With You", 3.59),
+         15: ("Cryogen.beatmap.txt", "Cryogen.mp3", "Cryogen", 5.02),
+         16: ("Hexagons.beatmap.txt", "Hexagons.mp3", "Hexagons", 5.44),
+         17: ("Hush.beatmap.txt", "Hush.mp3", "Hush", 3.92),
+         18: ("NightshiftSuperstar.beatmap.txt", "NightshiftSuperstar.mp3", "Nightshift Superstar", 4.1),
+         19: ("ShimmeringScars.beatmap.txt", "ShimmeringScars.mp3", "Shimmering Scars", 4.45),
+         20: ("TheDarkForest.beatmap.txt", "TheDarkForest.mp3", "The Dark Forest", 5.25),
+         21: ("TheSicknessInYouAndI.beatmap.txt", "TheSicknessInYouAndI.mp3", "The Sickness In You & I", 4.27),
+         22: ("Unravelling.beatmap.txt", "Unravelling.mp3", "Unravelling", 3.95),
     }
 
-    SONGCHOICE = randint(1,12)
+    SONGCHOICE = randint(1,22)
     SONGBMP = '../gameassets/Music/' + str(SONGFILES[SONGCHOICE][0])
     SONG = '../gameassets/Music/' + str(SONGFILES[SONGCHOICE][1])
 
     WHITE = (255, 255, 255)
 
     SPAWN_RATE = 360
+    SPAWN_RATE_LIMIT = 4
+    SPAWN_FAILS = 0
+    SPAWNS = 0
+    SPAWN_FAILS_LIMIT = 10
     BULLETSPAWN_RATE = 30
     FRAME_RATE = 60
     BOTTOMBORDER = WINDOW_HEIGHT - 150
@@ -54,6 +68,9 @@ while CONTINUEGAME:
     STARTING_BUCKS = 6
     BUCK_RATE = 1
     STARTING_BUCK_BOOSTER = 0
+    STARTING_GAME_DIFFICULTY = 1
+    SNEAKABLITY = 8
+    SNEAKABLITY_CAP = 10
 
     ICCOOLDOWN = 480
     VAMPIRISM = 5
@@ -217,6 +234,9 @@ while CONTINUEGAME:
             if self.health <= 0 or self.rect.y > BOTTOMBORDER:
                 if self.health <= 0:
                     counters.score += 1
+                    if randint(1, 6) == 1:
+                        counters.difficulty += 1
+                        print(counters.difficulty)
                 self.kill()
 
 
@@ -244,23 +264,27 @@ while CONTINUEGAME:
             collided = sprite.spritecollide(self, all_vampires, True)
             if collided is not None and not counters.playerimmune:
                 for anchovy in collided:
-                    self.health -= 1
-                    counters.pizza_bucks -= 1
-                    counters.bad_reviews = STARTING_BUCKS
-                    for vampire in all_vampires:
-                        vampire.kill()
-                    for bullet in all_bullets:
-                        bullet.kill()
+                    if counters.sneakingactive == False or randint(SNEAKABLITY,SNEAKABLITY_CAP) > SNEAKABLITY:
+                        self.health -= 1
+                        counters.pizza_bucks -= 1
+                        counters.bad_reviews = STARTING_BUCKS
+                        if counters.difficulty > 1:
+                            counters.difficulty -=1
+                        for vampire in all_vampires:
+                            vampire.kill()
+                        for bullet in all_bullets:
+                            bullet.kill()
             collidedbullet = sprite.spritecollide(self, all_bullets, True)
             if collidedbullet is not None and not counters.playerimmune:
                 for anchovy in collidedbullet:
-                    self.health -= 1
-                    counters.pizza_bucks -= 1
-                    counters.bad_reviews = STARTING_BUCKS
-                    for vampire in all_vampires:
-                        vampire.kill()
-                    for bullet in all_bullets:
-                        bullet.kill()
+                    if counters.sneakingactive == False or randint(SNEAKABLITY,SNEAKABLITY_CAP) > SNEAKABLITY:
+                        self.health -= 1
+                        counters.pizza_bucks -= 1
+                        counters.bad_reviews = STARTING_BUCKS
+                        for vampire in all_vampires:
+                            vampire.kill()
+                        for bullet in all_bullets:
+                            bullet.kill()
             if self.health != counters.pizza_bucks:
                 self.health = counters.pizza_bucks
             if self.health <= 0:
@@ -446,7 +470,7 @@ while CONTINUEGAME:
 
     # Create a new class
     class Counters(object):
-        def __init__(self, pizza_bucks, buck_rate, buck_booster, timer):
+        def __init__(self, pizza_bucks, buck_rate, buck_booster, timer, starting_difficulty):
             self.loop_count = 0
             self.display_font = font.Font('../gameassets/pizza_font.ttf', 25)
             self.pizza_bucks = pizza_bucks
@@ -459,6 +483,7 @@ while CONTINUEGAME:
             self.bad_reviews = 3
             self.bad_rev_rect = None
             self.score = 0
+            self.difficulty = starting_difficulty
             self.healactive = True
             self.slowactive = True
             self.blockactive = True
@@ -468,6 +493,7 @@ while CONTINUEGAME:
             self.immuneactive = True
             self.playerimmune = False
             self.randomdeathactive = True
+            self.sneakingactive = False
 
             self.basilicon_rect = None
             self.anchovyicon_rect = None
@@ -608,7 +634,7 @@ while CONTINUEGAME:
     all_bombs = sprite.Group()
     all_spellcards = sprite.Group()
 
-    counters = Counters(STARTING_BUCKS, BUCK_RATE, STARTING_BUCK_BOOSTER, WIN_TIME)
+    counters = Counters(STARTING_BUCKS, BUCK_RATE, STARTING_BUCK_BOOSTER, WIN_TIME, STARTING_GAME_DIFFICULTY)
 
     # -----------------------------------------
     # Initialize and Draw background Grid
@@ -680,6 +706,7 @@ while CONTINUEGAME:
         for sprote in playersprites:
             if keydown[K_LSHIFT] or keydown[K_RSHIFT]:
                 sprote.speed = REG_SPEED / 2
+                counters.sneakingactive = True
             else:
                 sprote.speed = REG_SPEED
             if keydown[K_UP] or keydown[K_w]:
@@ -692,9 +719,27 @@ while CONTINUEGAME:
                 sprote.rect.x += sprote.speed
             if keydown[K_q] or keydown[K_z]:
                 Anchovy(sprote.rect.x, sprote.rect.y)
+
+        if event.type == KEYUP:
+            if event.key == K_LSHIFT or event.key == K_RSHIFT :
+                counters.sneakingactive = False
+
         if vampire_spawn_times and counters.loop_count >= vampire_spawn_times[0]:
             if counters.bmpactivated:
-                VampireSprite()
+                if SPAWN_FAILS == SPAWN_FAILS_LIMIT:
+                    VampireSprite()
+                    SPAWN_FAILS = 0
+                    SPAWNS += 1
+                elif SPAWNS == SPAWN_FAILS_LIMIT:
+                    SPAWNS = 0
+                    SPAWN_FAILS += 1
+                elif randint(0,SPAWN_RATE_LIMIT) == SPAWN_RATE_LIMIT:
+                    SPAWN_FAILS += 1
+                    SPAWNS = 0
+                else:
+                    VampireSprite()
+                    SPAWN_FAILS = 0
+                    SPAWNS += 1
             vampire_spawn_times.pop(0)
         if randint(1, BULLETSPAWN_RATE) == 1 and counters.randombulletsactivated:
             BulletSprite()
