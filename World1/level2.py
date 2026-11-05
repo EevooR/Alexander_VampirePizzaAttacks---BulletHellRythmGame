@@ -1,7 +1,7 @@
 # Import Libraries
 import pygame
 from pygame import *
-from random import randint
+from random import randint, choice
 
 CONTINUEGAME = True
 
@@ -59,6 +59,7 @@ while CONTINUEGAME:
     SPAWN_FAILS = 0
     SPAWNS = 0
     SPAWN_FAILS_LIMIT = 10
+    INNOCENTRATE = 30
     BULLETSPAWN_RATE = 30
     FRAME_RATE = 60
     BOTTOMBORDER = WINDOW_HEIGHT - 150
@@ -71,18 +72,21 @@ while CONTINUEGAME:
     STARTING_GAME_DIFFICULTY = 1
     SNEAKABLITY = 8
     SNEAKABLITY_CAP = 10
+    BASEPOWER = 0
 
-    ICCOOLDOWN = 480
+
+    ICCOOLDOWN = 360
     VAMPIRISM = 5
 
     OCOOLDOWN = 200
     SLOWSPEED = 1
 
     PCOOLDOWN = 240
+    BLOCKTIMEBASE = 12 * FRAME_RATE
     LCOOLDOWN = 120
     KILLRATE = 5
-    KCOOLDOWN = 960
-    IMMUNITYCOOLDOWN = 240
+    KCOOLDOWN = 750
+    IMMUNITYCOOLDOWN = 7 * FRAME_RATE
     JCOOLDOWN = 240
 
     MAX_BAD_REVIEWS = 300
@@ -99,6 +103,26 @@ while CONTINUEGAME:
     pizza_img = image.load('../gameassets/vampire.png')
     pizza_surf = Surface.convert_alpha(pizza_img)
     VAMPIRE_PIZZA = transform.scale(pizza_surf, (WIDTH, HEIGHT))
+
+    zombie_img = image.load('../gameassets/zombie_pizza.png')
+    zombie_surf = Surface.convert_alpha(zombie_img)
+    ZOMBIE_PIZZA = transform.scale(zombie_surf, (WIDTH, HEIGHT))
+
+    were_img = image.load('../gameassets/were_pizza.png')
+    were_surf = Surface.convert_alpha(were_img)
+    WERE_PIZZA = transform.scale(were_surf, (WIDTH, HEIGHT))
+
+    spagh_img = image.load('../gameassets/CanibalSpaghetti.png')
+    spagh_surf = Surface.convert_alpha(spagh_img)
+    SPAGHETTI = transform.scale(spagh_surf, (WIDTH, HEIGHT))
+
+    cthu_img = image.load('../gameassets/cthulu-pizza.png')
+    cthu_surf = Surface.convert_alpha(cthu_img)
+    CTHULHU = transform.scale(cthu_surf, (WIDTH, HEIGHT))
+
+    tomat_img = image.load('../gameassets/tomato-running.png')
+    tomat_surf = Surface.convert_alpha(tomat_img)
+    TOMATO = transform.scale(tomat_surf, (WIDTH, HEIGHT))
 
     garlic_img = image.load('../gameassets/garlic.png')
     garlic_surf = Surface.convert_alpha(garlic_img)
@@ -192,6 +216,9 @@ while CONTINUEGAME:
                         vampire.health = 0
                     for bullet in all_bullets:
                         bullet.kill()
+                    for innocent in all_innocents:
+                        innocent.kill()
+                        counters.power +=10
             collidedspell = sprite.spritecollide(self, all_spellcards, True)
             if collidedspell is not None:
                 for spell in collidedspell:
@@ -209,11 +236,12 @@ while CONTINUEGAME:
                             bullet.kill()
                     elif spell.spellcard == "slow":
                         for vampire in all_vampires:
-                            vampire.speed = SLOWSPEED
+                            vampire.speed = vampire.speed / 2
                         for bullet in all_bullets:
-                            bullet.speed = SLOWSPEED
+                            bullet.speed = bullet.speed / 2
                     elif spell.spellcard == "block":
                         counters.bmpactivated = False
+                        counters.blocktime = BLOCKTIMEBASE
                     elif spell.spellcard == "draw":
                         for vampire in all_vampires:
                             vampire.rect.x = self.rect.x
@@ -221,6 +249,7 @@ while CONTINUEGAME:
                             bullet.rect.x = self.rect.x
                     elif spell.spellcard == "immune":
                         counters.playerimmune = True
+                        counters.coolingdowntime = IMMUNITYCOOLDOWN
                     elif spell.spellcard == "randomkill":
                         for vampire in all_vampires:
                             if randint(1, KILLRATE) == 1:
@@ -244,6 +273,110 @@ while CONTINUEGAME:
             else:
                 game_window.blit(self.image, (self.rect.x, self.rect.y))
 
+    class ZombieSprite(VampireSprite):
+        def __init__(self):
+            super(ZombieSprite, self).__init__()
+            self.speed = REG_SPEED // 2
+            self.image = ZOMBIE_PIZZA
+            self.health = ENEMYHEALTH *2
+
+    class WereSprite(VampireSprite):
+        def __init__(self):
+            super(WereSprite, self).__init__()
+            self.speed = REG_SPEED * 2
+            self.image = WERE_PIZZA
+            self.health = ENEMYHEALTH *2
+
+    class CthuluSprite(VampireSprite):
+        def __init__(self):
+            super(CthuluSprite, self).__init__()
+            self.speed = REG_SPEED * (randint(1,10) / randint(1,5))
+            self.image = CTHULHU
+            self.health = ENEMYHEALTH * (randint(1,10) / randint(1,5))
+
+    class SpaghettiSprite(VampireSprite):
+        def __init__(self):
+            super(SpaghettiSprite, self).__init__()
+            self.image = SPAGHETTI.copy()
+
+        def update(self, game_window, counters):
+            collided = sprite.spritecollide(self, all_anchovies, True)
+            if collided is not None:
+                for anchovy in collided:
+                    self.health -= ENEMYHEALTHDEDUCTION
+            collidedboom = sprite.spritecollide(self, all_bombs, True)
+            if collidedboom is not None:
+                for anchovy in collidedboom:
+                    for vampire in all_vampires:
+                        vampire.health = 0
+                    for bullet in all_bullets:
+                        bullet.kill()
+                    for innocent in all_innocents:
+                        innocent.kill()
+                        counters.power +=10
+            collidedspell = sprite.spritecollide(self, all_spellcards, True)
+            if collidedspell is not None:
+                for spell in collidedspell:
+                    if spell.spellcard == "heal":
+                        healup = 0
+                        for vampire in all_vampires:
+                            healup += 1
+                        for bullet in all_bullets:
+                            healup += 1
+                        healup = healup // VAMPIRISM
+                        counters.pizza_bucks += healup
+                        for vampire in all_vampires:
+                            vampire.health = 0
+                        for bullet in all_bullets:
+                            bullet.kill()
+                    elif spell.spellcard == "slow":
+                        for vampire in all_vampires:
+                            vampire.speed = vampire.speed / 2
+                        for bullet in all_bullets:
+                            bullet.speed = bullet.speed / 2
+                    elif spell.spellcard == "block":
+                        counters.bmpactivated = False
+                        counters.blocktime = BLOCKTIMEBASE
+                    elif spell.spellcard == "draw":
+                        for vampire in all_vampires:
+                            vampire.rect.x = self.rect.x
+                        for bullet in all_bullets:
+                            bullet.rect.x = self.rect.x
+                    elif spell.spellcard == "immune":
+                        counters.playerimmune = True
+                        counters.coolingdowntime = IMMUNITYCOOLDOWN
+                    elif spell.spellcard == "randomkill":
+                        for vampire in all_vampires:
+                            if randint(1, KILLRATE) == 1:
+                                vampire.health = 0
+                        for bullet in all_bullets:
+                            if randint(1, KILLRATE) == 1:
+                                bullet.kill()
+            all_vampires.remove(self)
+            collidedVampire = sprite.spritecollide(self, all_vampires, True)
+            if collidedVampire is not None:
+                for vampire in collidedVampire:
+                    self.health += vampire.health
+                    for player in playersprites:
+                        self.rect.x = player.rect.x
+            all_vampires.add(self)
+
+
+
+            self.rect.y += self.speed
+
+            if self.health <= 0 or self.rect.y > BOTTOMBORDER:
+                if self.health <= 0:
+                    counters.score += 1
+                    if randint(1, 6) == 1:
+                        counters.difficulty += 1
+                        print(counters.difficulty)
+                self.kill()
+
+
+
+            else:
+                game_window.blit(self.image, (self.rect.x, self.rect.y))
 
     class PlayerSprite(sprite.Sprite):
         def __init__(self):
@@ -274,6 +407,8 @@ while CONTINUEGAME:
                             vampire.kill()
                         for bullet in all_bullets:
                             bullet.kill()
+                        for i in range(counters.difficulty * 5):
+                            InnocentSprite()
             collidedbullet = sprite.spritecollide(self, all_bullets, True)
             if collidedbullet is not None and not counters.playerimmune:
                 for anchovy in collidedbullet:
@@ -285,6 +420,14 @@ while CONTINUEGAME:
                             vampire.kill()
                         for bullet in all_bullets:
                             bullet.kill()
+                        for i in range(counters.difficulty * 5):
+                            InnocentSprite()
+            savedinnocent = sprite.spritecollide(self, all_innocents, True)
+            if savedinnocent is not None:
+                for innocent in savedinnocent:
+                    counters.power += 10
+
+
             if self.health != counters.pizza_bucks:
                 self.health = counters.pizza_bucks
             if self.health <= 0:
@@ -351,6 +494,9 @@ while CONTINUEGAME:
                         vampire.health = 0
                     for bullet in all_bullets:
                         bullet.kill()
+                    for innocent in all_innocents:
+                        innocent.kill()
+                        counters.power +=10
             collidedspell = sprite.spritecollide(self, all_spellcards, True)
             if collidedspell is not None:
                 for spell in collidedspell:
@@ -368,11 +514,12 @@ while CONTINUEGAME:
                             bullet.kill()
                     elif spell.spellcard == "slow":
                         for vampire in all_vampires:
-                            vampire.speed = SLOWSPEED
+                            vampire.speed /= 2
                         for bullet in all_bullets:
-                            bullet.speed = SLOWSPEED
+                            bullet.speed /= 2
                     elif spell.spellcard == "block":
                         counters.randombulletsactivated = False
+                        counters.blocktime = BLOCKTIMEBASE
                     elif spell.spellcard == "draw":
                         for vampire in all_vampires:
                             vampire.rect.x = self.rect.x
@@ -380,6 +527,7 @@ while CONTINUEGAME:
                             bullet.rect.x = self.rect.x
                     elif spell.spellcard == "immune":
                         counters.playerimmune = True
+                        counters.coolingdowntime = IMMUNITYCOOLDOWN
                     elif spell.spellcard == "randomkill":
                         for vampire in all_vampires:
                             if randint(1, KILLRATE) == 1:
@@ -417,6 +565,31 @@ while CONTINUEGAME:
                 self.kill()
             else:
                 game_window.blit(self.image, (self.rect.x, self.rect.y))
+
+    class InnocentSprite(sprite.Sprite):
+        def __init__(self):
+            super().__init__()
+            self.speed = REG_SPEED
+            self.lane = randint(0, 4)
+            all_innocents.add(self)
+            self.image = TOMATO.copy()
+            x = randint(0, WINDOW_WIDTH)
+            self.rect = self.image.get_rect(center=(x, 0))
+            self.radius = self.rect.width // 2
+            self.health = ENEMYHEALTH
+
+        def update(self, game_window, counters):
+
+            self.rect.y += self.speed
+
+            if self.health <= 0 or self.rect.y > BOTTOMBORDER:
+                if self.health <= 0:
+                    counters.power -= 10
+                self.kill()
+
+            else:
+                game_window.blit(self.image, (self.rect.x, self.rect.y))
+
 
     class SpellCardHeal(sprite.Sprite):
         def __init__(self, x, y):
@@ -470,7 +643,7 @@ while CONTINUEGAME:
 
     # Create a new class
     class Counters(object):
-        def __init__(self, pizza_bucks, buck_rate, buck_booster, timer, starting_difficulty):
+        def __init__(self, pizza_bucks, buck_rate, buck_booster, timer, starting_difficulty, starting_power):
             self.loop_count = 0
             self.display_font = font.Font('../gameassets/pizza_font.ttf', 25)
             self.pizza_bucks = pizza_bucks
@@ -494,6 +667,9 @@ while CONTINUEGAME:
             self.playerimmune = False
             self.randomdeathactive = True
             self.sneakingactive = False
+            self.power = starting_power
+            self.coolingdowntime = 0
+            self.blocktime = 0
 
             self.basilicon_rect = None
             self.anchovyicon_rect = None
@@ -608,9 +784,50 @@ while CONTINUEGAME:
             if self.randomdeathactive:
                 game_window.blit(PINEAPPLEMINI, self.pineappleicon_rect)
 
+        def check_cards(self):
+            if self.coolingdowntime > 0 :
+                self.coolingdowntime -= 1
+            elif self.coolingdowntime <= 0:
+                self.playerimmune = False
+            if self.blocktime > 0:
+                self.blocktime -=1
+            elif self.blocktime <= 0:
+                self.randombulletsactivated = True
+                self.bmpactivated = True
+
+            if  self.power >= ICCOOLDOWN:
+                self.healactive = True
+            if self.power >= OCOOLDOWN:
+                self.slowactive = True
+            if self.power >= PCOOLDOWN:
+                self.blockactive = True
+            if self.power >= JCOOLDOWN:
+                self.drawactive = True
+            if self.power >= KCOOLDOWN:
+                self.immuneactive = True
+            if self.power >= LCOOLDOWN:
+                self.randomdeathactive = True
+
+            if  self.power < ICCOOLDOWN:
+                self.healactive = False
+            if self.power < OCOOLDOWN:
+                self.slowactive = False
+            if self.power < PCOOLDOWN:
+                self.blockactive = False
+            if self.power < JCOOLDOWN:
+                self.drawactive = False
+            if self.power < KCOOLDOWN:
+                self.immuneactive = False
+            if self.power < LCOOLDOWN:
+                self.randomdeathactive = False
+
+
+
+
         def update(self, game_window):
             self.loop_count += 1
             self.increment_bucks()
+            self.check_cards()
             self.draw_bucks(game_window)
             self.draw_bad_reviews(game_window)
             self.draw_timer(game_window)
@@ -624,6 +841,7 @@ while CONTINUEGAME:
             self.draw_pineappleicon(game_window)
 
 
+
     # --------------------------------------------
     # Create class instances and groups
     # Create a group for all Vampire Sprite Instances
@@ -633,8 +851,22 @@ while CONTINUEGAME:
     all_bullets = sprite.Group()
     all_bombs = sprite.Group()
     all_spellcards = sprite.Group()
+    all_innocents = sprite.Group()
 
-    counters = Counters(STARTING_BUCKS, BUCK_RATE, STARTING_BUCK_BOOSTER, WIN_TIME, STARTING_GAME_DIFFICULTY)
+    def summonEnenmy(gameDiff) :
+        if gameDiff < 5 :
+            VampireSprite()
+        elif gameDiff < 10 :
+            choice([VampireSprite, ZombieSprite])()
+        elif gameDiff < 15 :
+            choice([VampireSprite, ZombieSprite, WereSprite])()
+        elif gameDiff < 20 :
+            choice([VampireSprite, ZombieSprite, WereSprite, CthuluSprite])()
+        else :
+            choice([VampireSprite, ZombieSprite, WereSprite, CthuluSprite, SpaghettiSprite])()
+
+
+    counters = Counters(STARTING_BUCKS, BUCK_RATE, STARTING_BUCK_BOOSTER, WIN_TIME, STARTING_GAME_DIFFICULTY, BASEPOWER)
 
     # -----------------------------------------
     # Initialize and Draw background Grid
@@ -674,31 +906,37 @@ while CONTINUEGAME:
                 if event.key == K_i:
                     if counters.healactive:
                         counters.healactive = False
+                        counters.power -= ICCOOLDOWN
                         for playerchar in playersprites:
                             SpellCardHeal(playerchar.rect.x, playerchar.rect.y)
                 if event.key == K_o:
                     if counters.slowactive:
                         counters.slowactive = False
+                        counters.power -= OCOOLDOWN
                         for playerchar in playersprites:
                             SpellCardSlow(playerchar.rect.x, playerchar.rect.y)
                 if event.key == K_p:
                     if counters.blockactive:
                         counters.blockactive = False
+                        counters.power -= PCOOLDOWN
                         for playerchar in playersprites:
                             SpellCardBlock(playerchar.rect.x, playerchar.rect.y)
                 if event.key == K_j:
                     if counters.drawactive:
                         counters.drawactive = False
+                        counters.power -= JCOOLDOWN
                         for playerchar in playersprites:
                             SpellCardDraw(playerchar.rect.x, playerchar.rect.y)
                 if event.key == K_k:
                     if counters.immuneactive:
                         counters.immuneactive = False
+                        counters.power -= KCOOLDOWN
                         for playerchar in playersprites:
                             SpellCardImmune(playerchar.rect.x, playerchar.rect.y)
                 if event.key == K_l:
                     if counters.randomdeathactive:
                         counters.randomdeathactive = False
+                        counters.power -= LCOOLDOWN
                         for playerchar in playersprites:
                             SpellCardRandomKill(playerchar.rect.x, playerchar.rect.y)
 
@@ -727,7 +965,7 @@ while CONTINUEGAME:
         if vampire_spawn_times and counters.loop_count >= vampire_spawn_times[0]:
             if counters.bmpactivated:
                 if SPAWN_FAILS == SPAWN_FAILS_LIMIT:
-                    VampireSprite()
+                    summonEnenmy(counters.difficulty)
                     SPAWN_FAILS = 0
                     SPAWNS += 1
                 elif SPAWNS == SPAWN_FAILS_LIMIT:
@@ -737,30 +975,14 @@ while CONTINUEGAME:
                     SPAWN_FAILS += 1
                     SPAWNS = 0
                 else:
-                    VampireSprite()
+                    summonEnenmy(counters.difficulty)
                     SPAWN_FAILS = 0
                     SPAWNS += 1
             vampire_spawn_times.pop(0)
         if randint(1, BULLETSPAWN_RATE) == 1 and counters.randombulletsactivated:
             BulletSprite()
-        if randint(1, ICCOOLDOWN) == 1:
-            counters.healactive = True
-        if randint(1, OCOOLDOWN) == 1:
-            counters.slowactive = True
-        if randint(1, ICCOOLDOWN) == 1:
-            counters.healactive = True
-        if randint(1, PCOOLDOWN) == 1:
-            counters.blockactive = True
-            counters.randombulletsactivated = True
-            counters.bmpactivated = True
-        if randint(1, JCOOLDOWN) == 1:
-            counters.drawactive = True
-        if randint(1, KCOOLDOWN) == 1:
-            counters.immuneactive = True
-        if randint(1, IMMUNITYCOOLDOWN) == 1:
-            counters.playerimmune = False
-        if randint(1, LCOOLDOWN) == 1:
-            counters.randomdeathactive = True
+        if randint(1, INNOCENTRATE) == 1:
+            InnocentSprite()
         # ------------------------------------------
 
         if counters.pizza_bucks <= 0:
@@ -776,6 +998,8 @@ while CONTINUEGAME:
             anchovie.update(GAME_WINDOW)
         for bullet in all_bullets:
             bullet.update(GAME_WINDOW, counters)
+        for innocent in all_innocents:
+            innocent.update(GAME_WINDOW, counters)
         for bomb in all_bombs:
             bomb.update(GAME_WINDOW)
         for cards in all_spellcards:
