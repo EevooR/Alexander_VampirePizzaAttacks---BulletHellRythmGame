@@ -1,3 +1,4 @@
-cd C:\Users\redyo\Downloads\Progects\Alexander_VampirePizzaAttacks---BulletHellRythmGame\World1
-python level1.py
+@echo off
+cd src
+python ver2.py
 pause
