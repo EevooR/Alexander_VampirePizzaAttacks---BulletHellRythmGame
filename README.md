@@ -7,9 +7,9 @@ This is a long term project based off of the Attack of the Vampire Pizzas projec
 ## How to Play
 
 The Moon has been corrupted and as such all the monsters of Halloween have turned Evil, Freshly carved Jack’o’Lantern Jack has been carved and is the last bastion of hope to save humanity. 
-
-| Q | W | E |  | Basic Attack | Move Up | Bomb |  | Z | ↑ | X |
+|  | KEYS |  |  |  | EFFECTS |  |  |  | KEYS |  |
 | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
+| Q | W | E |  | Basic Attack | Move Up | Bomb |  | Z | ↑ | X |
 | A | S | D |  | Move Left | Move Down | Move Right |  | ←  | ↓  | → |
 |  |  |  |  |  |  |  |  |  |  |  |
 |  |  |  |  | Left Shift | Sneak | Right Shift |  |  |  |  |
@@ -72,3 +72,18 @@ customRythmBulletHell \- (for windows only) auto runs 2.0.0
 
 Requires an up to date version of Python and Pygame
 
+## Music Credits
+
+* "Doctor Boctor Bone Doctor" by Ategon, used under CC BY 4.0 - <https://opengameart.org/content/doctor-boctor-bone-doctor>
+* "Red Moon Red" by Enzo Alexander
+* "WTF! Ghost!" by Alexandr Zhelanov <https://soundcloud.com/alexandr-zhelanov>, used under CC BY 3.0 - <https://opengameart.org/content/wtf-ghost>
+* "Swing Along" by bramd, used under CC BY 4.0 - <https://opengameart.org/content/swing-along>
+* "Chagrin" by Spring Spring, used under OGA BY 4.0 and CC 0 - <https://opengameart.org/content/chagrin>
+* "Spider's Web" by Trevor Lentz, used under CC BY 3.0 - <https://opengameart.org/content/spiders-web>
+* "Catchy Sci-Fi Background Track - Snail Walk" by Tavalus, used under CC BY 3.0 - <https://opengameart.org/content/catchy-sci-fi-background-track-snail-walk>
+* "Bravery Vampire" by MintoDog, used under CC 0 - <https://opengameart.org/content/bravery-vampire>
+* "Jackolantern" by bobjt, used under CC 0 - <https://opengameart.org/content/jackolantern>
+* ""Crow Man's Stage"" by Threxx and Spring Spring, used under CC 0 - <https://opengameart.org/content/crow-mans-stage>
+* "the final encounter..." by VinylScratch, used under OGA BY 4.0 - <https://opengameart.org/content/the-final-encounter>
+* "Eat' sa Pizza" by howeverice, used under CC BY SA 4.0 - <https://opengameart.org/content/eat-sa-pizza>
+* "carol of bells - sinister" by bobjt, used under CC BY 4.0 and CC 0 - <https://opengameart.org/content/carol-of-bells-sinister>
